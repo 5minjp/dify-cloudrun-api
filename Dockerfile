@@ -4,6 +4,9 @@ FROM langgenius/dify-api:1.6.0
 # Set the working directory
 WORKDIR /app/api
 
+# Copy the health check script into the container
+COPY health_check.py /app/api/health_check.py
+
 # Copy the custom entrypoint script into the container
 COPY entrypoint.sh /app/api/entrypoint.sh
 
