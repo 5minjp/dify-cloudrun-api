@@ -10,8 +10,9 @@ ENV PYTHONPATH=/app/api
 # ワーキングディレクトリを設定
 WORKDIR /app/api
 
-# カスタムのentrypoint.shを追加
+# カスタムのentrypoint.shとcelery_app.pyを追加
 COPY entrypoint.sh /entrypoint.sh
+COPY celery_app.py /app/api/celery_app.py
 
 # エントリーポイントスクリプトに実行権限を付与
 RUN chmod +x /entrypoint.sh
