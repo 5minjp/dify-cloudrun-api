@@ -1,13 +1,16 @@
 #!/bin/bash
+
+# Exit immediately if a command exits with a non-zero status.
 set -e
 
-# Start a simple web server for health checks on port 5000
-if [ "$MODE" = "worker" ]; then
-  echo "Starting health check server..."
-  gunicorn --bind 0.0.0.0:5000 --workers 1 --threads 1 --timeout 300 health_check:app &
-fi
+# Start health check server in the background
+echo "Starting health check server on port 5000..."
+export FLASK_APP=health_check:app
+flask run --host=0.0.0.0 --port=5000 &
 
-# Execute the original entrypoint logic from the base image
-# This will start the API server or Celery worker based on the MODE
-echo "Executing original entrypoint..."
-/entrypoint.sh
+# Wait a bit for the health server to start
+sleep 3
+
+# Execute the original entrypoint command to start the main application (Celery worker)
+echo "Starting main application (Celery worker)..."
+exec /app/api/entrypoint-unit.sh
