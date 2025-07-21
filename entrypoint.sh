@@ -11,6 +11,6 @@ flask run --host=0.0.0.0 --port=5000 &
 # Wait a bit for the health server to start
 sleep 5
 
-# Execute the Celery worker directly, bypassing the faulty base entrypoint
+# Execute the Celery worker directly with the correct app path
 echo "Starting Celery worker directly..."
-celery -A app.celery_app worker -l INFO
+celery -A celery_app worker -l INFO
