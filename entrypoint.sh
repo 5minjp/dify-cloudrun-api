@@ -9,8 +9,8 @@ export FLASK_APP=health_check:app
 flask run --host=0.0.0.0 --port=5000 &
 
 # Wait a bit for the health server to start
-sleep 3
+sleep 5
 
 # Execute the original entrypoint command to start the main application (Celery worker)
-echo "Starting main application (Celery worker)..."
-exec /app/api/entrypoint-unit.sh
+echo "Executing original entrypoint to start Celery worker..."
+exec /entrypoint.sh
