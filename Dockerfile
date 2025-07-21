@@ -1,6 +1,11 @@
 # ベースイメージとしてDocker Hubからイメージをプル
 FROM langgenius/dify-api:latest
 
+# 環境変数を設定（公式Dockerfileに合わせて）
+ENV FLASK_APP=app.py
+ENV EDITION=SELF_HOSTED
+ENV DEPLOY_ENV=PRODUCTION
+
 # ワーキングディレクトリを設定
 WORKDIR /app/api
 
