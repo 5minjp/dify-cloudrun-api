@@ -54,13 +54,11 @@ if [[ "${MODE}" == "worker" ]]; then
   fi
 
   echo "Starting Celery worker with command:"
-  echo "celery -A celery_app worker -P ${CELERY_WORKER_CLASS:-gevent} $CONCURRENCY_OPTION --max-tasks-per-child ${MAX_TASK_PRE_CHILD:-50} --loglevel ${LOG_LEVEL:-INFO} -Q ${CELERY_QUEUES:-dataset,mail,ops_trace,app_deletion}"
+  echo "celery -A app.celery worker -P ${CELERY_WORKER_CLASS:-gevent} $CONCURRENCY_OPTION --max-tasks-per-child ${MAX_TASK_PRE_CHILD:-50} --loglevel ${LOG_LEVEL:-INFO} -Q ${CELERY_QUEUES:-dataset,mail,ops_trace,app_deletion}"
   
-  # Use our custom celery_app wrapper
-  echo "Attempting to start Celery with custom wrapper..."
-  exec celery -A celery_app worker -P ${CELERY_WORKER_CLASS:-gevent} $CONCURRENCY_OPTION \
-    --max-tasks-per-child ${MAX_TASK_PRE_CHILD:-50} --loglevel ${LOG_LEVEL:-INFO} \
-    -Q ${CELERY_QUEUES:-dataset,mail,ops_trace,app_deletion}
+  # Use direct app.celery reference
+  echo "Attempting to start Celery with app.celery..."
+  exec celery -A app.celery worker -P ${CELERY_WORKER_CLASS:-gevent} $CONCURRENCY_OPTION --max-tasks-per-child ${MAX_TASK_PRE_CHILD:-50} --loglevel ${LOG_LEVEL:-INFO} -Q ${CELERY_QUEUES:-dataset,mail,ops_trace,app_deletion}
 
 elif [[ "${MODE}" == "beat" ]]; then
   exec celery -A celery_app beat --loglevel ${LOG_LEVEL:-INFO}
