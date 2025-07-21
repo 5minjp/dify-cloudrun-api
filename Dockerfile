@@ -1,5 +1,5 @@
 # Use the official Dify API image as the base
-FROM langgenius/dify-api:0.6.16
+FROM langgenius/dify-api:1.6.0
 
 # Set the working directory
 WORKDIR /app/api
