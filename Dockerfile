@@ -1,6 +1,9 @@
 # ベースイメージとしてDocker Hubからイメージをプル
 FROM langgenius/dify-api:latest
 
+# ワーキングディレクトリを設定
+WORKDIR /app/api
+
 # カスタムのentrypoint.shを追加
 COPY entrypoint.sh /entrypoint.sh
 
