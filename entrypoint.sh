@@ -2,15 +2,9 @@
 
 set -e
 
-# Start a simple health check server for Cloud Run
+# Start a simple HTTP server for health checks
 if [[ "${MODE}" == "worker" || "${MODE}" == "beat" ]]; then
-  # Create a simple health check endpoint in background
-  (
-    mkdir -p /tmp/health
-    echo '{"status": "ok"}' > /tmp/health/index.html
-    cd /tmp/health
-    python -m http.server 5000 > /dev/null 2>&1
-  ) &
+  nohup python -m http.server 5000 &
 fi
 
 if [[ "${MIGRATION_ENABLED}" == "true" ]]; then
@@ -47,6 +41,7 @@ else
       --worker-class ${SERVER_WORKER_CLASS:-gevent} \
       --worker-connections ${SERVER_WORKER_CONNECTIONS:-10} \
       --timeout ${GUNICORN_TIMEOUT:-200} \
+      --preload \
       app:app
   fi
 fi
