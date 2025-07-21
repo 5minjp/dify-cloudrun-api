@@ -11,7 +11,7 @@ COPY health_check.py /app/api/health_check.py
 COPY debug_entrypoint.sh /app/api/debug_entrypoint.sh
 
 # Fix line endings and set executable permission
-RUN dos2unix /app/api/debug_entrypoint.sh && chmod +x /app/api/debug_entrypoint.sh
+RUN sed -i 's/\r$//' /app/api/debug_entrypoint.sh && chmod +x /app/api/debug_entrypoint.sh
 
 # Set custom entrypoint
 ENTRYPOINT ["/app/api/debug_entrypoint.sh"]
