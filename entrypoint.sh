@@ -2,6 +2,18 @@
 
 set -e
 
+# デバッグ情報を出力
+echo "Current working directory: $(pwd)"
+echo "Python path: $PYTHONPATH"
+echo "Flask app: $FLASK_APP"
+echo "Contents of /app/api:"
+ls -la /app/api/ | head -10
+
+# Start a simple HTTP server for health checks (Cloud Run requirement)
+if [[ "${MODE}" == "worker" || "${MODE}" == "beat" ]]; then
+  nohup python -m http.server 5000 &
+fi
+
 if [[ "${MIGRATION_ENABLED}" == "true" ]]; then
   echo "Running migrations"
   flask upgrade-db
@@ -20,6 +32,9 @@ if [[ "${MODE}" == "worker" ]]; then
     CONCURRENCY_OPTION="-c ${CELERY_WORKER_AMOUNT:-1}"
   fi
 
+  echo "Starting Celery worker with command:"
+  echo "celery -A app.celery worker -P ${CELERY_WORKER_CLASS:-gevent} $CONCURRENCY_OPTION --max-tasks-per-child ${MAX_TASK_PRE_CHILD:-50} --loglevel ${LOG_LEVEL:-INFO} -Q ${CELERY_QUEUES:-dataset,mail,ops_trace,app_deletion}"
+  
   exec celery -A app.celery worker -P ${CELERY_WORKER_CLASS:-gevent} $CONCURRENCY_OPTION \
     --max-tasks-per-child ${MAX_TASK_PRE_CHILD:-50} --loglevel ${LOG_LEVEL:-INFO} \
     -Q ${CELERY_QUEUES:-dataset,mail,ops_trace,app_deletion}

@@ -5,6 +5,7 @@ FROM langgenius/dify-api:latest
 ENV FLASK_APP=app.py
 ENV EDITION=SELF_HOSTED
 ENV DEPLOY_ENV=PRODUCTION
+ENV PYTHONPATH=/app/api
 
 # ワーキングディレクトリを設定
 WORKDIR /app/api
