@@ -2,9 +2,15 @@
 
 set -e
 
-# Start a simple HTTP server for health checks
+# Start a simple health check server for Cloud Run
 if [[ "${MODE}" == "worker" || "${MODE}" == "beat" ]]; then
-  nohup python -m http.server 5000 &
+  # Create a simple health check endpoint in background
+  (
+    mkdir -p /tmp/health
+    echo '{"status": "ok"}' > /tmp/health/index.html
+    cd /tmp/health
+    python -m http.server 5000 > /dev/null 2>&1
+  ) &
 fi
 
 if [[ "${MIGRATION_ENABLED}" == "true" ]]; then
@@ -25,11 +31,12 @@ if [[ "${MODE}" == "worker" ]]; then
     CONCURRENCY_OPTION="-c ${CELERY_WORKER_AMOUNT:-1}"
   fi
 
-  exec celery -A app.celery worker -P ${CELERY_WORKER_CLASS:-gevent} $CONCURRENCY_OPTION --loglevel ${LOG_LEVEL} \
+  exec celery -A app.celery worker -P ${CELERY_WORKER_CLASS:-gevent} $CONCURRENCY_OPTION \
+    --max-tasks-per-child ${MAX_TASK_PRE_CHILD:-50} --loglevel ${LOG_LEVEL:-INFO} \
     -Q ${CELERY_QUEUES:-dataset,mail,ops_trace,app_deletion}
 
 elif [[ "${MODE}" == "beat" ]]; then
-  exec celery -A app.celery beat --loglevel ${LOG_LEVEL}
+  exec celery -A app.celery beat --loglevel ${LOG_LEVEL:-INFO}
 else
   if [[ "${DEBUG}" == "true" ]]; then
     exec flask run --host=${DIFY_BIND_ADDRESS:-0.0.0.0} --port=${DIFY_PORT:-5001} --debug
@@ -38,8 +45,8 @@ else
       --bind "${DIFY_BIND_ADDRESS:-0.0.0.0}:${DIFY_PORT:-5001}" \
       --workers ${SERVER_WORKER_AMOUNT:-1} \
       --worker-class ${SERVER_WORKER_CLASS:-gevent} \
+      --worker-connections ${SERVER_WORKER_CONNECTIONS:-10} \
       --timeout ${GUNICORN_TIMEOUT:-200} \
-      --preload \
       app:app
   fi
 fi
